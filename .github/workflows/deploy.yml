@@ -29,10 +29,10 @@ jobs:
         APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
       run: |
         echo "Deploying to $HOST"
-        scp -r ./* $USER@$HOST:/*
+        scp -r ./* $USER@$HOST:/
         scp -r ./dist $USER@$HOST:/var/www/html
         ssh $USER@$HOST << 'EOF'
-          cd /path/to/your/backend
+          cd /
           echo "MONGODB_URI=$MONGODB_URI" >> .env
           echo "JWT_SECRET_KEY=$JWT_SECRET_KEY" >> .env
           echo "SENDER_EMAIL_ACCOUNT=$SENDER_EMAIL_ACCOUNT" >> .env
