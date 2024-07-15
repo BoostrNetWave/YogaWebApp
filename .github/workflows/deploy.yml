@@ -17,7 +17,7 @@ jobs:
     - name: Set up SSH
       uses: webfactory/ssh-agent@v0.5.3
       with:
-        ssh-private-key: ${{ secrets.yoga }}
+        ssh-private-key: ${{ secrets.YOGA }}
 
     - name: Build and deploy
       env:
