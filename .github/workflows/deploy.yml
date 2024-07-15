@@ -20,21 +20,21 @@ jobs:
 
     - name: Build and deploy
       env:
-        HOST: your_droplet_ip
-        USER: your_username
+        HOST: ${{ secrets.DO_HOST }}
+        USER: ${{ secrets.DO_USER }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        PORT: ${{ secrets.PORT }}
       run: |
         echo "Deploying to $HOST"
-        scp -r ./backend $USER@$HOST:/path/to/your/backend
-        scp -r ./frontend $USER@$HOST:/path/to/your/frontend
+        scp -r ./dist $USER@$HOST:/path/to/your/backend
+        scp -r ./frontend/build $USER@$HOST:/var/www/html
         ssh $USER@$HOST << 'EOF'
           cd /path/to/your/backend
+          echo "DATABASE_URL=$DATABASE_URL" >> .env
+          echo "SECRET_KEY=$SECRET_KEY" >> .env
+          echo "PORT=$PORT" >> .env
           npm install
-          pm2 restart all || pm2 start server.js --name backend
-
-          cd /path/to/your/frontend
-          npm install
-          npm run build
-          sudo cp -r build/* /var/www/html/
+          pm2 restart all || pm2 start index.mjs --name backend
           sudo systemctl restart nginx
         EOF
-
