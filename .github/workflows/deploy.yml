@@ -1,3 +1,4 @@
+
 name: Deploy to DigitalOcean
 
 on:
@@ -28,15 +29,14 @@ jobs:
         APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
       run: |
         echo "Deploying to $HOST"
-        scp -r ./dist $USER@$HOST:/path/to/your/backend
-        scp -r ./frontend/build $USER@$HOST:/var/www/html
+        scp -r ./* $USER@$HOST:/*
+        scp -r ./dist $USER@$HOST:/var/www/html
         ssh $USER@$HOST << 'EOF'
           cd /path/to/your/backend
           echo "MONGODB_URI=$MONGODB_URI" >> .env
           echo "JWT_SECRET_KEY=$JWT_SECRET_KEY" >> .env
           echo "SENDER_EMAIL_ACCOUNT=$SENDER_EMAIL_ACCOUNT" >> .env
           echo "APP_PASSWORD=$APP_PASSWORD" >> .env
-          npm install
           pm2 restart all || pm2 start index.mjs --name backend
           sudo systemctl restart nginx
         EOF
