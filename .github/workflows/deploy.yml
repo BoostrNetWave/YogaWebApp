@@ -28,9 +28,9 @@ jobs:
         APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
       run: |
         echo "Deploying to $HOST"
-        scp -r . $USER@$HOST:/root/
-        scp -r ./YogaWebApp/dist $USER@$HOST:/var/www/html
-        ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
+        scp -o "StrictHostKeyChecking no" -r . $USER@$HOST:/root/
+        scp -o "StrictHostKeyChecking no" -r ./YogaWebApp/dist $USER@$HOST:/var/www/html
+        ssh -o "StrictHostKeyChecking no" $USER@$HOST << 'EOF'
           cd /root
           echo "MONGODB_URI=$MONGODB_URI" >> .env
           echo "JWT_SECRET_KEY=$JWT_SECRET_KEY" >> .env
