@@ -17,7 +17,7 @@ jobs:
     - name: Set up SSH
       uses: webfactory/ssh-agent@v0.5.3
       with:
-        ssh-private-key: ${{ secrets.YOGA }}
+        ssh-private-key: ${{ secrets.YOGA_APP }}
 
     - name: Build and deploy
       env:
@@ -29,7 +29,7 @@ jobs:
         APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
       run: |
         echo "Deploying to $HOST"
-        scp -r ./* $USER@$HOST:/
+        scp -r ./ $USER@$HOST:/root/
         scp -r ./dist $USER@$HOST:/var/www/html
         ssh $USER@$HOST << 'EOF'
           cd /
