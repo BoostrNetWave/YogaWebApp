@@ -1,11 +1,10 @@
-
 name: Deploy to DigitalOcean
 
 on:
   push:
     branches:
       - main
-      
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -31,8 +30,8 @@ jobs:
         echo "Deploying to $HOST"
         scp -r . $USER@$HOST:/root/
         scp -r ./YogaWebApp/dist $USER@$HOST:/var/www/html
-        ssh -o StrictHostKeyChecking=no root@170.64.233.22 $USER@$HOST << 'EOF'
-          cd /
+        ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
+          cd /root
           echo "MONGODB_URI=$MONGODB_URI" >> .env
           echo "JWT_SECRET_KEY=$JWT_SECRET_KEY" >> .env
           echo "SENDER_EMAIL_ACCOUNT=$SENDER_EMAIL_ACCOUNT" >> .env
