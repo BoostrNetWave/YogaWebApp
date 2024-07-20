@@ -29,7 +29,7 @@ jobs:
       run: |
         echo "Deploying to $HOST"
         scp -o "StrictHostKeyChecking no" -r $GITHUB_WORKSPACE/* $USER@$HOST:/root/
-        scp -o "StrictHostKeyChecking no" -r $GITHUB_WORKSPACE/dist $USER@$HOST:/var/www/html
+        scp -o "StrictHostKeyChecking no" -r $GITHUB_WORKSPACE/dist/* $USER@$HOST:/var/www/html
         ssh -o "StrictHostKeyChecking no" $USER@$HOST << 'EOF'
           cd /root
           echo "MONGODB_URI=$MONGODB_URI" >> .env
