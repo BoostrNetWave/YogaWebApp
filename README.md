@@ -1,4 +1,4 @@
-# this one is a Complete Deployment
+# This one is a Complete Deployment
 
 # The bellow is a deployment of MERN stack application
 
