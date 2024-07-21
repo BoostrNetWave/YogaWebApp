@@ -46,6 +46,99 @@ jobs:
           sudo systemctl restart nginx
         EOF
 
+Certainly! Here is a detailed explanation of the GitHub Actions workflow for deploying your application to DigitalOcean:
+
+```yaml
+name: Deploy to DigitalOcean
+
+on:
+  push:
+    branches:
+      - main
+```
+
+- **name**: The name of the workflow, "Deploy to DigitalOcean".
+- **on**: Specifies the event that triggers the workflow. Here, it triggers on a `push` to the `main` branch.
+
+```yaml
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+```
+
+- **jobs**: Defines the jobs that make up the workflow. Each job runs in a separate runner environment.
+- **deploy**: The name of this particular job.
+- **runs-on**: Specifies the type of runner to use. `ubuntu-latest` is a virtual machine running the latest version of Ubuntu.
+
+```yaml
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+```
+
+- **steps**: Lists the sequence of tasks to be executed as part of the job.
+- **Checkout code**: The name of the step that checks out the repository code to the runner. It uses the `actions/checkout@v2` action to do this.
+
+```yaml
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.YOGA_APP }}
+```
+
+- **Set up SSH**: The name of the step that sets up SSH access.
+- **uses**: Specifies the action to be used. `webfactory/ssh-agent@v0.5.3` sets up the SSH agent.
+- **with**: Specifies input parameters for the action.
+  - **ssh-private-key**: Refers to the SSH private key stored in GitHub Secrets under `YOGA_APP`. This key is used for authenticating with the remote server.
+
+```yaml
+    - name: Build and deploy
+      env:
+        HOST: ${{ secrets.DO_HOST }}
+        USER: ${{ secrets.DO_USER }}
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+        SENDER_EMAIL_ACCOUNT: ${{ secrets.SENDER_EMAIL_ACCOUNT }}
+        APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
+      run: |
+        echo "Deploying to $HOST"
+        scp -o "StrictHostKeyChecking no" -r $GITHUB_WORKSPACE/* $USER@$HOST:/root/
+        scp -o "StrictHostKeyChecking no" -r $GITHUB_WORKSPACE/YogaWebApp/dist $USER@$HOST:/var/www/html
+        ssh -o "StrictHostKeyChecking no" $USER@$HOST << 'EOF'
+          cd /root
+          echo "MONGODB_URI=$MONGODB_URI" >> .env
+          echo "JWT_SECRET_KEY=$JWT_SECRET_KEY" >> .env
+          echo "SENDER_EMAIL_ACCOUNT=$SENDER_EMAIL_ACCOUNT" >> .env
+          echo "APP_PASSWORD=$APP_PASSWORD" >> .env
+          pm2 restart all || pm2 start index.mjs --name backend
+          sudo systemctl restart nginx
+        EOF
+```
+
+- **Build and deploy**: The name of the step that handles the build and deployment process.
+- **env**: Specifies environment variables for the step.
+  - **HOST**: The hostname or IP address of the DigitalOcean server, stored in GitHub Secrets.
+  - **USER**: The username for the server, stored in GitHub Secrets.
+  - **MONGODB_URI**: The MongoDB connection string, stored in GitHub Secrets.
+  - **JWT_SECRET_KEY**: The secret key for JWT, stored in GitHub Secrets.
+  - **SENDER_EMAIL_ACCOUNT**: The email account used for sending emails, stored in GitHub Secrets.
+  - **APP_PASSWORD**: The application password, stored in GitHub Secrets.
+
+- **run**: Specifies the shell commands to run.
+  - `echo "Deploying to $HOST"`: Prints a message indicating the start of the deployment process.
+  - `scp -o "StrictHostKeyChecking no" -r $GITHUB_WORKSPACE/* $USER@$HOST:/root/`: Securely copies all files from the GitHub workspace to the `/root/` directory on the server, bypassing host key checking.
+  - `scp -o "StrictHostKeyChecking no" -r $GITHUB_WORKSPACE/YogaWebApp/dist $USER@$HOST:/var/www/html`: Securely copies the `dist` directory from the `YogaWebApp` folder to the `/var/www/html` directory on the server.
+  - `ssh -o "StrictHostKeyChecking no" $USER@$HOST << 'EOF'`: Starts an SSH session on the server, bypassing host key checking. The following commands are executed on the server:
+    - `cd /root`: Changes the directory to `/root`.
+    - `echo "MONGODB_URI=$MONGODB_URI" >> .env`: Appends the MongoDB URI to the `.env` file.
+    - `echo "JWT_SECRET_KEY=$JWT_SECRET_KEY" >> .env`: Appends the JWT secret key to the `.env` file.
+    - `echo "SENDER_EMAIL_ACCOUNT=$SENDER_EMAIL_ACCOUNT" >> .env`: Appends the sender email account to the `.env` file.
+    - `echo "APP_PASSWORD=$APP_PASSWORD" >> .env`: Appends the application password to the `.env` file.
+    - `pm2 restart all || pm2 start index.mjs --name backend`: Restarts all PM2 processes or starts the backend application with PM2 if it's not running.
+    - `sudo systemctl restart nginx`: Restarts the Nginx service to apply any new configuration changes.
+
+This script sets up an automated deployment pipeline that triggers whenever changes are pushed to the `main` branch. It ensures the latest code is securely copied to your DigitalOcean server, environment variables are updated, and the necessary services are restarted.
+
 
 # Complete Github Action Deployment Of This Application
 
